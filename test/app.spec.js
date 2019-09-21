@@ -3,9 +3,9 @@ const supertest = require('supertest')
 const app = require('../src/app')
 
 describe('App', () => {
-  it('GET / responds with 200 containing "Hello, world!"', () => {
+  it('GET / responds with response.ok', () => {
     return supertest(app)
-      .get('/')
-      .expect(200, 'Hello, world!')
+      .get('/api/')
+      .expect(200)
   })
 })

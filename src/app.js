@@ -15,8 +15,27 @@ app.use(morgan(morganOption))
 app.use(helmet())
 app.use(cors())
 
-app.get('/api/*', (req, res) => {
-    res.send({ok: true})
+app.get('/api', (req, res) => {
+    res.status(200).send()
+})
+app.get('/api/users', (req, res) => {
+    let knexInstance = req.app.get('db')
+    knexInstance.select('*').from('users').then(users => {
+        res.status(200).send(users)
+    })
+})
+app.get('/api/articles', (req, res) => {
+    let knexInstance = req.app.get('db')
+    knexInstance.select('*').from('articles').then(articles => {
+        res.status(200).send(articles)
+    })
+})
+
+app.get('/api/comments', (req, res) => {
+    let knexInstance = req.app.get('db')
+    knexInstance.select('*').from('comments').then(comments => {
+        res.status(200).send(comments)
+    })
 })
 
 app.use(function errorHandler(error, req, res, next) {
