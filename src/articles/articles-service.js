@@ -1,6 +1,9 @@
 const ArticlesService = {
     getAllArticles(knex) {
-        return knex.select('*').from('articles')
+        return knex
+            .select('*')
+            .from('articles')
+            .orderBy('created', "desc")
     },
     addArticle(knex, newArticle) {
         return knex

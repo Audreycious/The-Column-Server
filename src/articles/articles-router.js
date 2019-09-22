@@ -19,7 +19,7 @@ articlesRouter
     })
     .post(bodyParser, (req, res, next) => {
         let knexInstance = req.app.get('db')
-        let { id, user_id, headline, print } = req.body
+        let { id, user_id, headline, print, created } = req.body
         if (!headline) {
             logger.error(`Missing headline`)
             return res
@@ -46,7 +46,8 @@ articlesRouter
             id: id,
             user_id: tempUser,
             headline: headline,
-            print: print
+            print: print,
+            created: created
         }
         logger.info(newArticle)
         ArticlesService.addArticle(knexInstance, newArticle)
