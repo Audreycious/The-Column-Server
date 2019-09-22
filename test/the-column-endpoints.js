@@ -49,7 +49,7 @@ describe('The Column endpoints', () => {
                 });         
             })
         })
-        describe.only('POST /api/users', () => {
+        describe('POST /api/users', () => {
             it('creates a user, responding with 201 and the new user', () => {
                 return supertest(app)
                     .post('/api/users')
@@ -93,16 +93,43 @@ describe('The Column endpoints', () => {
                         
         })
     })
-
-    describe('GET /api/comments', () => {
-        context(`Given no comments`, function() {
-            it('responds with 200 and an empty list', () => {
-                return supertest(app)
-                    .get('/api/comments')
-                    .expect(200, [])       
+    describe('/api/comments endpoints', () => {
+        describe('GET /api/comments', () => {
+            context(`Given no comments`, function() {
+                it('responds with 200 and an empty list', () => {
+                    return supertest(app)
+                        .get('/api/comments')
+                        .expect(200, [])       
+                })
+            })        
+            context(`Given there are comments in the database`, function() {
+                let testUsers = makeUsersArray()
+                let testArticles = makeArticlesArray()
+                let testComments = makeCommentsArray()
+                beforeEach('insert users, articles, and comments', function() {
+                    return db
+                        .into('users')
+                        .insert(testUsers)
+                        .then(() => {
+                            return db
+                            .into('articles')
+                            .insert(testArticles)
+                            .then(() => {
+                                return db
+                                    .into('comments')
+                                    .insert(testComments)
+                            })
+                    })
+                })
+                it('responds with 200 and an array of testComments', function() {
+                    return supertest(app)
+                        .get('/api/comments')
+                        .expect(200, testComments)
+                });
+                            
             })
-        })        
-        context(`Given there are comments in the database`, function() {
+        })
+        describe('POST /api/comments', () => {
             let testUsers = makeUsersArray()
             let testArticles = makeArticlesArray()
             let testComments = makeCommentsArray()
@@ -121,13 +148,21 @@ describe('The Column endpoints', () => {
                         })
                 })
             })
-            it('responds with 200 and an array of testComments', function() {
+            it('creates a comment, responding with 201 and the new comment', () => {
+                let testComment = {
+                    id: '999999999999999',
+                    article_id: '1',
+                    user_id: '1',
+                    comment: "That's a great idea!"
+                }
                 return supertest(app)
-                    .get('/api/comments')
-                    .expect(200, testComments)
-            });
-                        
+                    .post('/api/comments')
+                    .send(testComment)
+                    .expect(201, testComment)       
+            })
         })
     })
-
 })
+
+// headline: 'Cowlina delays feeding time voluntarily!',
+// print: 'This old cat can be taught. Come see the amazing cat with human-like cognitive function!'

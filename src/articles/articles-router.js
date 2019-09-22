@@ -1,27 +1,27 @@
 const express = require('express')
-const commentsRouter = express.Router()
-const CommentsService = require('./comments-service')
+const articlesRouter = express.Router()
+const ArticlesService = require('./articles-service')
 const bodyParser = express.json()
 const uuid = require('uuid/v4')
 const logger = require('../logger')
 
-commentsRouter
+articlesRouter
     .route('/')
     .get((req, res, next) => {
         let knexInstance = req.app.get('db')
-        CommentsService.getAllComments(knexInstance)
-            .then(comments => {
-                if (!comments) {
-                    return res.status(400).send(`Comments not found`)
+        ArticlesService.getAllArticles(knexInstance)
+            .then(articles => {
+                if (!articles) {
+                    return res.status(400).send(`Articles not found`)
                 }
-                res.status(200).json(comments)
+                res.status(200).json(articles)
             })
     })
     .post(bodyParser, (req, res, next) => {
         let knexInstance = req.app.get('db')
-        let { id, article_id, user_id, comment } = req.body
-        if (!article_id) {
-            logger.error(`Missing article_id`)
+        let { id, user_id, headline, print } = req.body
+        if (!headline) {
+            logger.error(`Missing headline`)
             return res
                 .status(400)
                 .json({
@@ -36,32 +36,24 @@ commentsRouter
                     error: { message: `Sorry, article not available` }
                 })
         }
-        if (!comment) {
-            logger.error(`Comment is required`)
-            return res
-                .status(400)
-                .json({
-                    error: { message: `Comment is required` }
-                })
-        }
         if (id == null) {
             id = uuid()
         }
 
         // TODO: Implement user accounts to send the id with it
         const tempUser = "1"
-        const newComment = {
+        const newArticle = {
             id: id,
-            article_id: article_id,
             user_id: tempUser,
-            comment: comment
+            headline: headline,
+            print: print
         }
-        logger.info(newComment)
-        CommentsService.addComment(knexInstance, newComment)
-            .then(comment => {
-                res.status(201).send(comment)
+        logger.info(newArticle)
+        ArticlesService.addArticle(knexInstance, newArticle)
+            .then(article => {
+                res.status(201).send(article)
             })
         
     })
 
-module.exports = commentsRouter
+module.exports = articlesRouter
