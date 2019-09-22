@@ -4,6 +4,7 @@ const morgan = require('morgan')
 const cors = require('cors')
 const helmet = require('helmet')
 const { NODE_ENV } = require('./config')
+const usersRouter = require('./users/users-router')
 
 const app = express()
 
@@ -18,12 +19,8 @@ app.use(cors())
 app.get('/api', (req, res) => {
     res.status(200).send()
 })
-app.get('/api/users', (req, res) => {
-    let knexInstance = req.app.get('db')
-    knexInstance.select('*').from('users').then(users => {
-        res.status(200).send(users)
-    })
-})
+app.use('/api/users', usersRouter)
+
 app.get('/api/articles', (req, res) => {
     let knexInstance = req.app.get('db')
     knexInstance.select('*').from('articles').then(articles => {

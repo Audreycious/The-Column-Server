@@ -1,19 +1,19 @@
 const express = require('express')
-const usersRouter = express.Router()
-const UsersService = require('./users-service')
+const commentsRouter = express.Router()
+const CommentsService = require('./comments-service')
 const bodyParser = express.json()
 const uuid = require('uuid')
 
-usersRouter
+commentsRouter
     .route('/')
     .get((req, res, next) => {
         let knexInstance = req.app.get('db')
-        UsersService.getAllUsers(knexInstance)
-            .then(users => {
-                if (!users) {
-                    return res.status(400).send(`Users not found`)
+        CommentsService.getAllComments(knexInstance)
+            .then(comments => {
+                if (!comments) {
+                    return res.status(400).send(`Comments not found`)
                 }
-                res.status(200).json(users)
+                res.status(200).json(comments)
             })
     })
     .post(bodyParser, (req, res, next) => {
@@ -59,11 +59,11 @@ usersRouter
             username: username,
             password: password
         }
-        UsersService.addUser(knexInstance, newUser)
+        CommentsService.addUser(knexInstance, newUser)
             .then(user => {
                 res.status(201).send(user)
             })
         
     })
 
-module.exports = usersRouter
+module.exports = commentsRouter

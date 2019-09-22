@@ -26,28 +26,42 @@ describe('The Column endpoints', () => {
 
     after('disconnect from db', () => db.destroy())
 
-    describe('GET /api/users', () => {
-        context(`Given no users`, function() {
-            it('responds with 200 and an empty list', () => {
-                return supertest(app)
-                    .get('/api/users')
-                    .expect(200, [])       
+    describe('/api/users endpoints', () => {
+        describe('GET /api/users', () => {
+            context(`Given no users`, function() {
+                it('responds with 200 and an empty list', () => {
+                    return supertest(app)
+                        .get('/api/users')
+                        .expect(200, [])       
+                })
+            })        
+            context(`Given there are users in the database`, function() {
+                let testUsers = makeUsersArray()
+                beforeEach('insert users', function() {
+                    return db
+                        .into('users')
+                        .insert(testUsers)
+                })
+                it('responds with 200 and an array of testUsers', function() {
+                    return supertest(app)
+                        .get('/api/users')
+                        .expect(200, testUsers)
+                });         
             })
-        })        
-        context(`Given there are users in the database`, function() {
-            let testUsers = makeUsersArray()
-            beforeEach('insert users', function() {
-                return db
-                    .into('users')
-                    .insert(testUsers)
-            })
-            it('responds with 200 and an array of testUsers', function() {
-                return supertest(app)
-                    .get('/api/users')
-                    .expect(200, testUsers)
-            });
-                        
         })
+        describe.only('POST /api/users', () => {
+            it('creates a user, responding with 201 and the new user', () => {
+                return supertest(app)
+                    .post('/api/users')
+                    .send({
+                        name: 'Cowlina',
+                        email: 'luv4treats@meow.com',
+                        username: 'luv4treats',
+                        password: 'meow'
+                    })
+                    .expect(201)       
+            })
+        })   
     })
 
     describe('GET /api/articles', () => {
