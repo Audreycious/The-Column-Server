@@ -27,7 +27,7 @@ app.get('/api/users', (req, res) => {
 app.get('/api/articles', (req, res) => {
     let knexInstance = req.app.get('db')
     knexInstance.select('*').from('articles').then(articles => {
-        res.status(200).send(articles)
+        res.status(200).json(articles)
     })
 })
 
