@@ -1,4 +1,4 @@
-const logger = "../src/logger"
+const logger = require('../logger')
 
 const UsersService = {
     getAllUsers(knex) {
