@@ -26,12 +26,13 @@ describe('The Column endpoints', () => {
 
     after('disconnect from db', () => db.destroy())
 
-    describe('/api/users endpoints', () => {
+    describe.only('/api/users endpoints', () => {
         describe('GET /api/users', () => {
             context(`Given no users`, function() {
                 it('responds with 200 and an empty list', () => {
                     return supertest(app)
                         .get('/api/users')
+                        .set({ 'Authorization': 'Bearer admin' })
                         .expect(200, [])       
                 })
             })        
@@ -45,8 +46,38 @@ describe('The Column endpoints', () => {
                 it('responds with 200 and an array of testUsers', function() {
                     return supertest(app)
                         .get('/api/users')
+                        .set({ 'Authorization': 'Bearer admin' })
                         .expect(200, testUsers)
-                });         
+                })
+                // const validatedFields = [
+                //     // Dup email
+                //     // { 
+                //     //     field: 'Email', 
+                //     //     user: {
+                //     //         name: 'Audrey Foss',
+                //     //         email: 'Porcupine4@gmail.com', username: 'NewUserName',
+                //     //         password: 'NewPassword'
+                //     //     }
+                //     // },
+                //     // Dup username
+                //     {   
+                //         field: 'Username',
+                //         user: {
+                //             name: 'Audrey Foss',
+                //             email: 'NewEmail@gmail.com', username: 'Audrey',
+                //             password: 'NewPassword'
+                //         }
+                //     }
+                // ]
+                // validatedFields.forEach(validation => {
+                //     it(`responds with 400 and an error when ${validation.field} is already registered`, () => {
+                //         return supertest(app)
+                //             .post('/api/users')
+                //             .send(validation.user)
+                //             .expect(400, { error: `${validation.field} is already taken` })
+                //     })
+                // })
+                         
             })
         })
         describe('POST /api/users', () => {
@@ -54,10 +85,10 @@ describe('The Column endpoints', () => {
                 return supertest(app)
                     .post('/api/users')
                     .send({
-                        name: 'Cowlina',
-                        email: 'luv4treats@meow.com',
-                        username: 'luv4treats',
-                        password: 'meow'
+                        name: "Cowlina",
+                        email: "luv4treats@meow.com",
+                        username: "luv4treats",
+                        password: "meow"
                     })
                     .expect(201)       
             })
@@ -85,7 +116,7 @@ describe('The Column endpoints', () => {
                         .insert(testArticles)
                 })
             })
-            it('responds with 200 and an array of testArticles', function() {
+            it.skip('responds with 200 and an array of testArticles', function() {
                 return supertest(app)
                     .get('/api/articles')
                     .expect(200, testArticles)

@@ -16,7 +16,7 @@ CREATE TABLE articles (
     headline TEXT NOT NULL,
     print TEXT DEFAULT '',
     user_id TEXT REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-    created DATE NOT NULL
+    created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE comments (
