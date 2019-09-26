@@ -22,7 +22,8 @@ articlesRouter
     })
     .post(bodyParser, (req, res, next) => {
         let knexInstance = req.app.get('db')
-        let { id, user_id, headline, print, created } = req.body
+        let { id, headline, print, created } = req.body
+        let user_id = req.user.id
         if (!headline) {
             logger.error(`Missing headline`)
             return res
@@ -44,10 +45,9 @@ articlesRouter
         }
 
         // TODO: Implement user accounts to send the id with it
-        const tempUser = "1"
         const newArticle = {
             id: id,
-            user_id: tempUser,
+            user_id: user_id,
             headline: headline,
             print: print,
             created: created
