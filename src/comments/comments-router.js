@@ -4,9 +4,12 @@ const CommentsService = require('./comments-service')
 const bodyParser = express.json()
 const uuid = require('uuid/v4')
 const logger = require('../logger')
+const { requireAuth } = require('../auth/authentication')
+
 
 commentsRouter
     .route('/')
+    .all(requireAuth)
     .get((req, res, next) => {
         let knexInstance = req.app.get('db')
         CommentsService.getAllComments(knexInstance)

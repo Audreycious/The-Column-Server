@@ -1,10 +1,18 @@
 const { expect } = require('chai')
 const knex = require('knex')
 const app = require('../src/app')
+const logger = require('../src/logger')
 const { makeUsersArray, makeArticlesArray, makeCommentsArray } = require('./the-column.fixtures')
 
 describe('The Column endpoints', () => {
     let db
+
+    function makeAuthHeader(testUser) {
+        const { username, password } = testUser
+        const token = `${username}:${password}`
+        logger.info(token)
+        return `Bearer ${token}`
+    }
 
     before('make knex instance', () => {
         db = knex({
@@ -26,7 +34,7 @@ describe('The Column endpoints', () => {
 
     after('disconnect from db', () => db.destroy())
 
-    describe.only('/api/users endpoints', () => {
+    describe('/api/users endpoints', () => {
         describe('GET /api/users', () => {
             context(`Given no users`, function() {
                 it('responds with 200 and an empty list', () => {
@@ -97,9 +105,16 @@ describe('The Column endpoints', () => {
 
     describe('GET /api/articles', () => {
         context(`Given no articles`, function() {
+            let testUsers = makeUsersArray()
+            beforeEach('insert users', function() {
+                return db
+                    .into('users')
+                    .insert(testUsers)
+            })
             it('responds with 200 and an empty list', () => {
                 return supertest(app)
                     .get('/api/articles')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200, [])       
             })
         })        
@@ -110,6 +125,7 @@ describe('The Column endpoints', () => {
                 return db
                     .into('users')
                     .insert(testUsers)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .then(() => {
                         return db
                         .into('articles')
@@ -119,6 +135,7 @@ describe('The Column endpoints', () => {
             it.skip('responds with 200 and an array of testArticles', function() {
                 return supertest(app)
                     .get('/api/articles')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200, testArticles)
             });
                         
@@ -127,9 +144,16 @@ describe('The Column endpoints', () => {
     describe('/api/comments endpoints', () => {
         describe('GET /api/comments', () => {
             context(`Given no comments`, function() {
+                let testUsers = makeUsersArray()
+                beforeEach('insert users', function() {
+                    return db
+                        .into('users')
+                        .insert(testUsers)
+                })
                 it('responds with 200 and an empty list', () => {
                     return supertest(app)
                         .get('/api/comments')
+                        .set('Authorization', makeAuthHeader(testUsers[0]))
                         .expect(200, [])       
                 })
             })        
@@ -155,9 +179,16 @@ describe('The Column endpoints', () => {
                 it('responds with 200 and an array of testComments', function() {
                     return supertest(app)
                         .get('/api/comments')
+                        .set('Authorization', makeAuthHeader(testUsers[0]))
                         .expect(200, testComments)
-                });
-                            
+                })
+                it(`responds 401 'Unauthorized request' when invalid password`, () => {
+                    const userInvalidPass = { username: testUsers[0].username, password: 'wrong' }
+                    return supertest(app)
+                        .get(`/api/articles`)
+                        .set('Authorization', makeAuthHeader(userInvalidPass))
+                        .expect(401, { error: `Unauthorized request` })
+                })
             })
         })
         describe('POST /api/comments', () => {
@@ -188,6 +219,7 @@ describe('The Column endpoints', () => {
                 }
                 return supertest(app)
                     .post('/api/comments')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(testComment)
                     .expect(201, testComment)       
             })
