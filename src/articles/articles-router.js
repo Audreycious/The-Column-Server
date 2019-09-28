@@ -41,11 +41,12 @@ articlesRouter
                     error: { message: `Sorry, article not available` }
                 })
         }
+        logger.info(print)
+        
         if (id == null) {
             id = uuid()
         }
 
-        // TODO: Implement user accounts to send the id with it
         const newArticle = {
             id: id,
             user_id: user_id,

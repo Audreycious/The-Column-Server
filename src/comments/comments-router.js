@@ -24,6 +24,9 @@ commentsRouter
         let knexInstance = req.app.get('db')
         let { id, article_id, comment } = req.body
         let user_id = req.user.id
+        let username = req.user.username
+        logger.info(comment)
+        logger.info(username)
         if (!article_id) {
             logger.error(`Missing article_id`)
             return res
@@ -51,12 +54,12 @@ commentsRouter
         if (id == null) {
             id = uuid()
         }
-
         // TODO: Implement user accounts to send the id with it
         const newComment = {
             id: id,
             article_id: article_id,
             user_id: user_id,
+            username: username,
             comment: comment
         }
         logger.info(newComment)
