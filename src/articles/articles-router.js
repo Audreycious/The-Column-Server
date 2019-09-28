@@ -17,13 +17,14 @@ articlesRouter
                 if (!articles) {
                     return res.status(400).send(`Articles not found`)
                 }
-                res.status(200).json(articles)
+                return res.status(200).json(articles)
             })
     })
     .post(bodyParser, (req, res, next) => {
         let knexInstance = req.app.get('db')
         let { id, headline, print, created } = req.body
         let user_id = req.user.id
+        let username = req.user.username
         if (!headline) {
             logger.error(`Missing headline`)
             return res
@@ -48,6 +49,7 @@ articlesRouter
         const newArticle = {
             id: id,
             user_id: user_id,
+            username: username,
             headline: headline,
             print: print,
             created: created
@@ -55,9 +57,8 @@ articlesRouter
         logger.info(newArticle)
         ArticlesService.addArticle(knexInstance, newArticle)
             .then(article => {
-                res.status(201).send(article)
+                return res.status(201).send(article)
             })
-        
     })
 
 module.exports = articlesRouter

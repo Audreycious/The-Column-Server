@@ -15,7 +15,7 @@ function requireAuth(req, res, next) {
     let splitBearer = bearerToken.split(":")
     const tokenUsername = splitBearer[0]
     const tokenPassword = splitBearer[1]
-
+    logger.info(splitBearer)
     if (!tokenUsername || !tokenPassword) {
         logger.info(`Returning at second check`)
         return res.status(401).json({ error: 'Unauthorized request' })
@@ -28,7 +28,8 @@ function requireAuth(req, res, next) {
             if (!user || user.password !== tokenPassword) {
                 return res.status(401).json({error: 'Unauthorized request'})
             }
-            req.user = user
+            logger.info(user)
+            req.user = user 
             next()
         })
         .catch(next)
