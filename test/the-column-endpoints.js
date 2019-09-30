@@ -121,18 +121,17 @@ describe('The Column endpoints', () => {
         context(`Given there are articles in the database`, function() {
             let testUsers = makeUsersArray()
             let testArticles = makeArticlesArray()
-            beforeEach('insert users and articles', function() {
+            beforeEach('insert users and articles', () => {
                 return db
                     .into('users')
                     .insert(testUsers)
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .then(() => {
                         return db
                         .into('articles')
                         .insert(testArticles)
                 })
             })
-            it.skip('responds with 200 and an array of testArticles', function() {
+            it('responds with 200 and an array of testArticles', function() {
                 return supertest(app)
                     .get('/api/articles')
                     .set('Authorization', makeAuthHeader(testUsers[0]))
@@ -217,7 +216,10 @@ describe('The Column endpoints', () => {
                     id: '999999999999999',
                     article_id: testArticle.id,
                     user_id: testUser.id,
-                    comment: "That's a great idea!"
+                    comment: "That's a great idea!",
+                    username: 'Audrey',
+                    usernumarticles: null, 
+                    usernumcomments: null
                 }
                 return supertest(app)
                     .post('/api/comments')
