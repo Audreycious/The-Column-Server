@@ -4,18 +4,20 @@ const UsersService = require('./users-service')
 const bodyParser = express.json()
 const uuid = require('uuid')
 const logger = require('../logger')
+const { requireAuth } = require('../auth/authentication')
 
 usersRouter
     .route('/')
+    .all(requireAuth)
     .get((req, res, next) => {
         // Validate it's a request from an admin
-        const apiToken = process.env.SERVER_API_TOKEN
-        const authToken = req.get('Authorization')
-        if (!authToken || authToken.split(' ')[1] !== apiToken) {
-            logger.error(`Unauthorized request to path: api/users${req.path}`)
-            return res.status(401).json({ error: 'Unauthorized request' })
-        }
-        else {
+        // const apiToken = process.env.SERVER_API_TOKEN
+        // let { password } = req.user
+        // if (password.toLowerCase() !== apiToken) {
+        //     logger.error(`Unauthorized request to path: api/users${req.path}`)
+        //     return res.status(401).json({ error: 'Unauthorized request' })
+        // }
+        // else {
             let knexInstance = req.app.get('db')
             UsersService.getAllUsers(knexInstance)
                 .then(users => {
@@ -24,11 +26,13 @@ usersRouter
                     }
                     res.status(200).json(users)
                 })
-        }
+        // }
     })
     .post(bodyParser, (req, res, next) => {
         let knexInstance = req.app.get('db')
-        let { name, email, username, password } = req.body
+        let { name, email } = req.body
+        let { username } = req.user.username
+        let { password } = req.user.password
         if (!name) {
             logger.error(`Name is required`)
             return res

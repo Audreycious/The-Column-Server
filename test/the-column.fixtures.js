@@ -1,7 +1,9 @@
 
+const bcrypt = require('bcryptjs')
 
 function makeUsersArray() {
     return [
+        {id: '0', name: 'Admin', email: 'Admin@gmail.com', username: 'Admin', password: 'Admin'},
         {id: '1', name: 'Audrey', email: 'Porcupine4@gmail.com', username: 'Audrey', password: 'Audrey'},
         {id: '2', name: 'Danielle', email: 'meercatnip@gmail.com', username: 'Danielle', password: 'Danielle'},
     ]
@@ -38,8 +40,18 @@ function makeCommentsArray() {
     {id: '18', article_id: '5', user_id: '2', comment: 'Is that a yes???', username: '1', usernumarticles: '1', usernumcomments: '1'}]
 }
 
+function seedUsers(db, users) {
+    const preppedUsers = users.map(user => ({
+        ...user,
+        password: bcrypt.hashSync(user.password, 12)
+    }))
+    return db.into('users').insert(preppedUsers)
+}
+
+
 module.exports = {
     makeUsersArray,
     makeArticlesArray,
-    makeCommentsArray
+    makeCommentsArray,
+    seedUsers
 }

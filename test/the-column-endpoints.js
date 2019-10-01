@@ -2,7 +2,8 @@ const { expect } = require('chai')
 const knex = require('knex')
 const app = require('../src/app')
 const logger = require('../src/logger')
-const { makeUsersArray, makeArticlesArray, makeCommentsArray } = require('./the-column.fixtures')
+const { makeUsersArray, makeArticlesArray, makeCommentsArray, seedUsers } = require('./the-column.fixtures')
+
 
 describe('The Column endpoints', () => {
     let db
@@ -25,7 +26,7 @@ describe('The Column endpoints', () => {
         return db.raw("SET timezone to 'America/Chicago'")
     })
     before('clean the table', function() {
-        return db.raw('TRUNCATE comments, articles, users RESTART IDENTITY CASCADE') 
+        return db.raw('TRUNCATE comments, articles, users RESTART IDENTITY CASCADE')
     })
 
     afterEach('cleanup',function() {
@@ -34,64 +35,37 @@ describe('The Column endpoints', () => {
 
     after('disconnect from db', () => db.destroy())
 
-    describe('/api/users endpoints', () => {
+    // No longer needed
+    describe.skip('/api/users endpoints', () => {
         describe('GET /api/users', () => {
             context(`Given no users`, function() {
-                it('responds with 200 and an empty list', () => {
+                let testUsers = makeUsersArray()
+                it('responds with 401', () => {
                     return supertest(app)
                         .get('/api/users')
-                        .set({ 'Authorization': 'Bearer admin' })
-                        .expect(200, [])       
+                        .set({'Authorization': makeAuthHeader(testUsers[0])})
+                        .expect(401)       
                 })
             })        
             context(`Given there are users in the database`, function() {
                 let testUsers = makeUsersArray()
                 beforeEach('insert users', function() {
-                    return db
-                        .into('users')
-                        .insert(testUsers)
+                    return seedUsers(db, testUsers)
                 })
                 it('responds with 200 and an array of testUsers', function() {
                     return supertest(app)
                         .get('/api/users')
-                        .set({ 'Authorization': 'Bearer admin' })
-                        .expect(200, testUsers)
+                        .set({'Authorization': makeAuthHeader(testUsers[0])})
+                        .expect(200, preppedUsers)
                 })
-                // const validatedFields = [
-                //     // Dup email
-                //     // { 
-                //     //     field: 'Email', 
-                //     //     user: {
-                //     //         name: 'Audrey Foss',
-                //     //         email: 'Porcupine4@gmail.com', username: 'NewUserName',
-                //     //         password: 'NewPassword'
-                //     //     }
-                //     // },
-                //     // Dup username
-                //     {   
-                //         field: 'Username',
-                //         user: {
-                //             name: 'Audrey Foss',
-                //             email: 'NewEmail@gmail.com', username: 'Audrey',
-                //             password: 'NewPassword'
-                //         }
-                //     }
-                // ]
-                // validatedFields.forEach(validation => {
-                //     it(`responds with 400 and an error when ${validation.field} is already registered`, () => {
-                //         return supertest(app)
-                //             .post('/api/users')
-                //             .send(validation.user)
-                //             .expect(400, { error: `${validation.field} is already taken` })
-                //     })
-                // })
-                         
             })
         })
         describe('POST /api/users', () => {
+            let testUsers = makeUsersArray()
             it('creates a user, responding with 201 and the new user', () => {
                 return supertest(app)
                     .post('/api/users')
+                    .set({'Authorization': makeAuthHeader(testUsers[0])})
                     .send({
                         name: "Cowlina",
                         email: "luv4treats@meow.com",
@@ -107,9 +81,7 @@ describe('The Column endpoints', () => {
         context(`Given no articles`, function() {
             let testUsers = makeUsersArray()
             beforeEach('insert users', function() {
-                return db
-                    .into('users')
-                    .insert(testUsers)
+                return seedUsers(db, testUsers)
             })
             it('responds with 200 and an empty list', () => {
                 return supertest(app)
@@ -122,9 +94,7 @@ describe('The Column endpoints', () => {
             let testUsers = makeUsersArray()
             let testArticles = makeArticlesArray()
             beforeEach('insert users and articles', () => {
-                return db
-                    .into('users')
-                    .insert(testUsers)
+                return seedUsers(db, testUsers)
                     .then(() => {
                         return db
                         .into('articles')
@@ -145,9 +115,7 @@ describe('The Column endpoints', () => {
             context(`Given no comments`, function() {
                 let testUsers = makeUsersArray()
                 beforeEach('insert users', function() {
-                    return db
-                        .into('users')
-                        .insert(testUsers)
+                    return seedUsers(db, testUsers)
                 })
                 it('responds with 200 and an empty list', () => {
                     return supertest(app)
@@ -161,9 +129,7 @@ describe('The Column endpoints', () => {
                 let testArticles = makeArticlesArray()
                 let testComments = makeCommentsArray()
                 beforeEach('insert users, articles, and comments', function() {
-                    return db
-                        .into('users')
-                        .insert(testUsers)
+                    return seedUsers(db, testUsers)
                         .then(() => {
                             return db
                             .into('articles')
@@ -195,9 +161,7 @@ describe('The Column endpoints', () => {
             let testArticles = makeArticlesArray()
             let testComments = makeCommentsArray()
             beforeEach('insert users, articles, and comments', function() {
-                return db
-                    .into('users')
-                    .insert(testUsers)
+                return seedUsers(db, testUsers)
                     .then(() => {
                         return db
                         .into('articles')
@@ -217,7 +181,7 @@ describe('The Column endpoints', () => {
                     article_id: testArticle.id,
                     user_id: testUser.id,
                     comment: "That's a great idea!",
-                    username: 'Audrey',
+                    username: 'Admin',
                     usernumarticles: null, 
                     usernumcomments: null
                 }
@@ -229,6 +193,36 @@ describe('The Column endpoints', () => {
             })
         })
     })
+
+    describe.only('/api/login endpoints', () => {
+        context('given there are users in the database', () => {
+            let testUsers = makeUsersArray()
+            beforeEach('insert users', function() {
+                return seedUsers(db, testUsers)
+            })
+            const requiredFields = ['user_name', 'password']
+            const testUser = testUsers[0]
+
+            requiredFields.forEach(field => {
+                const loginAttemptBody = {
+                    username: testUser.username,
+                    password: testUser.password,
+                }
+
+                it(`responds with 400 required error when '${field}' is missing`, () => {
+                    delete loginAttemptBody[field]
+
+                    return supertest(app)
+                    .post('/api/login')
+                    .send(loginAttemptBody)
+                    .expect(401, {
+                        error: `Unauthorized request`,
+                    })
+                })
+            })
+        })
+    })
+    
 })
 
 // headline: 'Cowlina delays feeding time voluntarily!',
