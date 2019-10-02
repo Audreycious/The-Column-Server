@@ -41,7 +41,6 @@ articlesRouter
                     error: { message: `Sorry, article not available` }
                 })
         }
-        logger.info(print)
         
         if (id == null) {
             id = uuid()
@@ -55,7 +54,6 @@ articlesRouter
             print: print,
             created: created
         }
-        logger.info(newArticle)
         ArticlesService.addArticle(knexInstance, newArticle)
             .then(article => {
                 return res.status(201).send(article)

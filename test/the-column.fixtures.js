@@ -1,5 +1,6 @@
 
 const bcrypt = require('bcryptjs')
+const logger = require('../src/logger')
 
 function makeUsersArray() {
     return [
@@ -40,11 +41,22 @@ function makeCommentsArray() {
     {id: '18', article_id: '5', user_id: '2', comment: 'Is that a yes???', username: '1', usernumarticles: '1', usernumcomments: '1'}]
 }
 
+function prepUsers(users) {
+    let preppedUsers
+    if (users.length > 1) {
+        preppedUsers = users.map(user => ({
+            ...user,
+            password: bcrypt.hashSync(user.password, 12)
+        }))
+    } else {
+        users.password = bcrypt.hashSync(users.password, 12)
+        preppedUsers = users
+    }
+    return preppedUsers
+}
+
 function seedUsers(db, users) {
-    const preppedUsers = users.map(user => ({
-        ...user,
-        password: bcrypt.hashSync(user.password, 12)
-    }))
+    const preppedUsers = prepUsers(users)
     return db.into('users').insert(preppedUsers)
 }
 
@@ -53,5 +65,6 @@ module.exports = {
     makeUsersArray,
     makeArticlesArray,
     makeCommentsArray,
-    seedUsers
+    seedUsers,
+    prepUsers
 }

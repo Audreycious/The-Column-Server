@@ -2,7 +2,8 @@ const { expect } = require('chai')
 const knex = require('knex')
 const app = require('../src/app')
 const logger = require('../src/logger')
-const { makeUsersArray, makeArticlesArray, makeCommentsArray, seedUsers } = require('./the-column.fixtures')
+const jwt = require('jsonwebtoken')
+const { makeUsersArray, makeArticlesArray, makeCommentsArray, seedUsers, prepUsers } = require('./the-column.fixtures')
 
 
 describe('The Column endpoints', () => {
@@ -11,7 +12,6 @@ describe('The Column endpoints', () => {
     function makeAuthHeader(testUser) {
         const { username, password } = testUser
         const token = `${username}:${password}`
-        logger.info(token)
         return `Bearer ${token}`
     }
 
@@ -194,35 +194,30 @@ describe('The Column endpoints', () => {
         })
     })
 
-    describe.only('/api/login endpoints', () => {
+    describe('/api/login endpoints', () => {
         context('given there are users in the database', () => {
             let testUsers = makeUsersArray()
             beforeEach('insert users', function() {
                 return seedUsers(db, testUsers)
             })
-            const requiredFields = ['user_name', 'password']
-            const testUser = testUsers[0]
 
-            requiredFields.forEach(field => {
-                const loginAttemptBody = {
-                    username: testUser.username,
-                    password: testUser.password,
+            let testUser = prepUsers(testUsers[1])
+            const loginAttemptAuth = `Bearer ${testUser.username}` + `:` + `${testUser.password}`
+            const expectedToken = jwt.sign({user_id: testUser.id}, process.env.JWT_SECRET,
+                {
+                    subject: testUser.username,
+                    algorithm: 'HS256',
                 }
-
-                it(`responds with 400 required error when '${field}' is missing`, () => {
-                    delete loginAttemptBody[field]
-
-                    return supertest(app)
-                    .post('/api/login')
-                    .send(loginAttemptBody)
-                    .expect(401, {
-                        error: `Unauthorized request`,
-                    })
-                })
-            })
+            )
+            it.only('responds with 200 and JWT auth token using secret when valid credentials', () => {
+                return supertest(app)
+                .post('/api/login')
+                .set('Authorization', loginAttemptAuth)
+                .expect(200, {authToken: expectedToken})
+            });
+            
         })
     })
-    
 })
 
 // headline: 'Cowlina delays feeding time voluntarily!',

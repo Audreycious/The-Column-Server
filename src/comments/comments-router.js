@@ -25,8 +25,6 @@ commentsRouter
         let { id, article_id, comment } = req.body
         let user_id = req.user.id
         let username = req.user.username
-        logger.info(comment)
-        logger.info(username)
         if (!article_id) {
             logger.error(`Missing article_id`)
             return res
@@ -62,7 +60,6 @@ commentsRouter
             username: username,
             comment: comment
         }
-        logger.info(newComment)
         CommentsService.addComment(knexInstance, newComment)
             .then(comment => {
                 res.status(201).send(comment)
