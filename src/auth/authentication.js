@@ -1,4 +1,5 @@
 const logger = require('../logger')
+const bcrypt = require('bcryptjs')
 
 function requireAuth(req, res, next) {
     let bearerToken
@@ -16,24 +17,32 @@ function requireAuth(req, res, next) {
     const tokenUsername = splitBearer[0]
     const tokenPassword = splitBearer[1]
     logger.info(splitBearer)
+    logger.info(tokenUsername)
+    logger.info(tokenPassword)
     if (!tokenUsername || !tokenPassword) {
         logger.info(`Returning at second check`)
         return res.status(401).json({ error: 'Unauthorized request' })
     }
-
-    req.app.get('db')('users')
+    let getUser = async () => {
+        req.app.get('db')('users')
         .where({username: tokenUsername})
         .first()
         .then(user => {
-            if (!user || user.password !== tokenPassword) {
+            logger.info(`User in getUser first`)
+            logger.info(user)
+            let passwordsMatch = bcrypt.compare(user.password, tokenPassword)
+            if (!passwordsMatch) {
+                logger.info(`Returning in GetUser`)
+                logger.info(user)
                 return res.status(401).json({error: 'Unauthorized request'})
             }
             logger.info(user)
             req.user = user 
             next()
         })
-        .catch(next)
-  }
+    }
+    getUser()
+}
   
 module.exports = {
     requireAuth,
