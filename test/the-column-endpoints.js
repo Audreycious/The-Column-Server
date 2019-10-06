@@ -1,7 +1,6 @@
 const { expect } = require('chai')
 const knex = require('knex')
 const app = require('../src/app')
-const logger = require('../src/logger')
 const { makeUsersArray, makeArticlesArray, makeCommentsArray } = require('./the-column.fixtures')
 
 describe('The Column endpoints', () => {
@@ -10,7 +9,6 @@ describe('The Column endpoints', () => {
     function makeAuthHeader(testUser) {
         const { username, password } = testUser
         const token = `${username}:${password}`
-        logger.info(token)
         return `Bearer ${token}`
     }
 
@@ -56,36 +54,7 @@ describe('The Column endpoints', () => {
                         .get('/api/users')
                         .set({ 'Authorization': 'Bearer admin' })
                         .expect(200, testUsers)
-                })
-                // const validatedFields = [
-                //     // Dup email
-                //     // { 
-                //     //     field: 'Email', 
-                //     //     user: {
-                //     //         name: 'Audrey Foss',
-                //     //         email: 'Porcupine4@gmail.com', username: 'NewUserName',
-                //     //         password: 'NewPassword'
-                //     //     }
-                //     // },
-                //     // Dup username
-                //     {   
-                //         field: 'Username',
-                //         user: {
-                //             name: 'Audrey Foss',
-                //             email: 'NewEmail@gmail.com', username: 'Audrey',
-                //             password: 'NewPassword'
-                //         }
-                //     }
-                // ]
-                // validatedFields.forEach(validation => {
-                //     it(`responds with 400 and an error when ${validation.field} is already registered`, () => {
-                //         return supertest(app)
-                //             .post('/api/users')
-                //             .send(validation.user)
-                //             .expect(400, { error: `${validation.field} is already taken` })
-                //     })
-                // })
-                         
+                })    
             })
         })
         describe('POST /api/users', () => {
@@ -182,9 +151,9 @@ describe('The Column endpoints', () => {
                         .expect(200, testComments)
                 })
                 it(`responds 401 'Unauthorized request' when invalid password`, () => {
-                    const userInvalidPass = { username: testUsers[0].username, password: 'wrong' }
+                    const userInvalidPass = { username: testUsers[0].username, password: 'wronger' }
                     return supertest(app)
-                        .get(`/api/articles`)
+                        .get(`/api/comments`)
                         .set('Authorization', makeAuthHeader(userInvalidPass))
                         .expect(401, { error: `Unauthorized request` })
                 })

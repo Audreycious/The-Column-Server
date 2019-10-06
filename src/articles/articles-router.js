@@ -26,11 +26,10 @@ articlesRouter
         let user_id = req.user.id
         let username = req.user.username
         if (!headline) {
-            logger.error(`Missing headline`)
             return res
                 .status(400)
                 .json({
-                    error: { message: `Sorry, article not available` }
+                    error: { message: `Headline is required` }
                 })
         }
         if (!user_id) {
@@ -38,10 +37,9 @@ articlesRouter
             return res
                 .status(400)
                 .json({
-                    error: { message: `Sorry, article not available` }
+                    error: { message: `User Id is missing` }
                 })
         }
-        logger.info(print)
         
         if (id == null) {
             id = uuid()
@@ -55,7 +53,6 @@ articlesRouter
             print: print,
             created: created
         }
-        logger.info(newArticle)
         ArticlesService.addArticle(knexInstance, newArticle)
             .then(article => {
                 return res.status(201).send(article)

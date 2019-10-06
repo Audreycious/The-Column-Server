@@ -81,9 +81,6 @@ usersRouter
             .then(usersArray => {
                 let userMatch = usersArray.find(user => user.username.toLowerCase() == newUser.username.toLowerCase())
                 let emailMatch = usersArray.find(user => user.email.toLowerCase() == newUser.email.toLowerCase())
-                // logger.info(usersArray)
-                // logger.info(userMatch)
-                // logger.info(emailMatch)
                 if (userMatch) {
                     return res.status(400).send({ error: `Username is already taken`})
                 }

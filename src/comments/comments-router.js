@@ -25,14 +25,12 @@ commentsRouter
         let { id, article_id, comment } = req.body
         let user_id = req.user.id
         let username = req.user.username
-        logger.info(comment)
-        logger.info(username)
         if (!article_id) {
             logger.error(`Missing article_id`)
             return res
                 .status(400)
                 .json({
-                    error: { message: `Sorry, article not available` }
+                    error: { message: `Article Id is required` }
                 })
         }
         if (!user_id) {
@@ -40,7 +38,7 @@ commentsRouter
             return res
                 .status(400)
                 .json({
-                    error: { message: `Sorry, article not available` }
+                    error: { message: `User Id is required` }
                 })
         }
         if (!comment) {
@@ -54,7 +52,7 @@ commentsRouter
         if (id == null) {
             id = uuid()
         }
-        // TODO: Implement user accounts to send the id with it
+
         const newComment = {
             id: id,
             article_id: article_id,
@@ -62,7 +60,6 @@ commentsRouter
             username: username,
             comment: comment
         }
-        logger.info(newComment)
         CommentsService.addComment(knexInstance, newComment)
             .then(comment => {
                 res.status(201).send(comment)
