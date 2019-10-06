@@ -10,16 +10,18 @@ const AuthService = require('../auth/auth-service')
 
 loginRouter
     .route('/')
+    .all(jsonBodyParser)
     .all(requireAuth)
-    .post(jsonBodyParser, (req, res, next) => {
-        let { id, username, password } = req.user
+    .post((req, res, next) => {
+        logger.info(`req.user in login router`)
+        logger.info(req.user)
+        let { id, username } = req.user
             const sub = username
             logger.info(sub)
             const payload = { user_id: id }
             return res.status(200).send({
                 authToken: AuthService.createJwt(sub, payload),
         })
-        .catch(next())
     })
 
 module.exports = loginRouter

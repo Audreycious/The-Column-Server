@@ -5,7 +5,6 @@ const logger = require('../logger')
 
 const AuthService = {
     createJwt(subject, payload) {
-        logger.info(subject)
         return jwt.sign(payload, config.JWT_SECRET, {
         subject,
         algorithm: 'HS256',
