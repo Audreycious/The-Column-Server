@@ -9,8 +9,8 @@ loginRouter
     .route('/')
     .all(requireAuth)
     .post(jsonBodyParser, (req, res, next) => {
-        let { username } = req.user
-        return res.status(200).json(`${username} is now logged in`)
+       
+        return res.status(200).json({articlesLeft: req.user.articlesleft})
     })
 
 module.exports = loginRouter
