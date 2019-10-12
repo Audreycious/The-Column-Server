@@ -12,12 +12,15 @@ articlesRouter
     .all(requireAuth)
     .get((req, res, next) => {
         let knexInstance = req.app.get('db')
+        let articlesleft = req.user.articlesleft
+        logger.info(`articlesleft`)
+        logger.info(articlesleft)
         ArticlesService.getAllArticles(knexInstance)
             .then(articles => {
                 if (!articles) {
                     return res.status(400).send(`Articles not found`)
                 }
-                return res.status(200).json(articles)
+                return res.status(200).json({articles: articles, articlesLeft: articlesleft})
             })
     })
     .post(bodyParser, (req, res, next) => {
@@ -26,6 +29,8 @@ articlesRouter
         let user_id = req.user.id
         let username = req.user.username
         // TODO post the new update to user articlesleft
+        
+
         if (!headline) {
             return res
                 .status(400)
@@ -45,6 +50,11 @@ articlesRouter
         if (id == null) {
             id = uuid()
         }
+
+        ArticlesService.useArticleLeft(knexInstance, username)
+            .then(user => {
+                return `do nothing`
+            })
 
         const newArticle = {
             id: id,

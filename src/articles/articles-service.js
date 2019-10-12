@@ -14,6 +14,11 @@ const ArticlesService = {
                 return rows[0]
             })
     },
+    useArticleLeft(knex, username) {
+        return knex('users')
+            .where('username', '=', username)
+            .decrement('articlesleft', 1)
+    }
 }
 
 module.exports = ArticlesService
