@@ -1,6 +1,4 @@
 const bcrypt = require('bcryptjs')
-const logger = require('../logger')
-const config = require('../config')
 
 function requireAuth(req, res, next) {
     let bearerToken
@@ -23,15 +21,12 @@ function requireAuth(req, res, next) {
             if (!user) {
                 return res.status(401).json({error: 'Unauthorized request'}) 
             }
-            logger.info(user.password)
             let encryptPassword = async () => {
                 return bcrypt.hash(tokenPassword, 10)
             }
             let passwordsMatch = async (password) => bcrypt.compare(user.password, password)
             encryptPassword().then(password => {
-                logger.info(password)
                 passwordsMatch(password).then(match => {
-                logger.info(match)
                 if (!match) {
                     return res.status(401).json({error: 'Unauthorized request'})
                 }

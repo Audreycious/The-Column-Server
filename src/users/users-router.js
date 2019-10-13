@@ -69,13 +69,7 @@ usersRouter
             username: username,
             password: password
         }
-        // UsersService.validateUserSignup(knexInstance, newUser)
-        //     .then(response => {
-        //         if (response.status === 400) {
-        //             return res.status(response.status).send(response.error)
-        //         }
-        //     })
-
+        
         // get all the users into an array, then iterate over the array to see if any match the username or email
         UsersService.getAllUsers(knexInstance)
             .then(usersArray => {

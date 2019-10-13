@@ -13,8 +13,6 @@ articlesRouter
     .get((req, res, next) => {
         let knexInstance = req.app.get('db')
         let articlesleft = req.user.articlesleft
-        logger.info(`articlesleft`)
-        logger.info(articlesleft)
         ArticlesService.getAllArticles(knexInstance)
             .then(articles => {
                 if (!articles) {
@@ -28,8 +26,6 @@ articlesRouter
         let { id, headline, print, created } = req.body.article
         let user_id = req.user.id
         let username = req.user.username
-        // TODO post the new update to user articlesleft
-        
 
         if (!headline) {
             return res

@@ -8,8 +8,6 @@ const usersRouter = require('./users/users-router')
 const commentsRouter = require('./comments/comments-router')
 const articlesRouter = require('./articles/articles-router')
 const loginRouter = require('./login/login-router')
-const bodyParser = express.json()
-const logger = require('./logger')
 
 const app = express()
 
