@@ -20,6 +20,9 @@ function requireAuth(req, res, next) {
         .where({username: tokenUsername})
         .first()
         .then(user => {
+            if (!user) {
+                return res.status(401).json({error: 'Unauthorized request'}) 
+            }
             logger.info(user.password)
             let encryptPassword = async () => {
                 return bcrypt.hash(tokenPassword, 10)
@@ -41,7 +44,8 @@ function requireAuth(req, res, next) {
     }
     if (!tokenUsername || !tokenPassword) {
         return res.status(401).json({ error: 'Unauthorized request' })
-    } else {
+    }
+    else {
         getUser()
     }
 }
